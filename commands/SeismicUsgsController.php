@@ -13,18 +13,19 @@ use yii\console\ExitCode;
 use GuzzleHttp\Client;
 
 /**
- * This command echoes the first argument that you have entered.
+ * This command downloads data from earthquake.usgs.gov.
  *
- * This command is provided as an example for you to learn how to create console commands.
+ * The received data is parsed and stored in the database.
  *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * @author Sav4yk <mail@sav4yk.ru>
  */
-class SeismicController extends Controller
+class SeismicUsgsController extends Controller
 {
     /**
-     * This command echoes what you have entered as the message.
-     * @param string $message the message to be echoed.
+     * This command downloads, parse and store data to the database .
+     * @param string $latitude user latitude coordinate.
+     * @param string $longitude user longitude coordinate.
+     * @param int $radius control radius.
      * @return int Exit code
      */
     public function actionIndex($latitude = '44.600246', $longitude = '33.530273', $radius = 5)
@@ -32,7 +33,7 @@ class SeismicController extends Controller
         $client = new Client();
         $res = $client->request('GET', 'https://earthquake.usgs.gov/fdsnws/event/1/query.geojson', [
             'query' => [
-                'starttime' => '2019-06-25',
+                'starttime' => date('Y-m-d', strtotime("-12 months")),
                 'endtime' => date('Y-m-d'),
                 'maxlatitude' => ((float) $latitude + $radius),
                 'minlatitude' => ((float) $latitude - $radius),
@@ -71,5 +72,7 @@ class SeismicController extends Controller
         }
         return ExitCode::OK;
     }
+
+
 
 }
