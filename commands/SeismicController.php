@@ -7,6 +7,7 @@
 
 namespace app\commands;
 
+use app\models\Earthquakes;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use GuzzleHttp\Client;
@@ -42,19 +43,33 @@ class SeismicController extends Controller
                 ]
         ]);
         if ($res->getStatusCode()==200) {
-
             $earthquakes = json_decode($res->getBody());
             $count = $earthquakes->metadata->count;
+            if ($count>20) $count = 20;
             for ($i=0; $i<$count; $i++){
                 $mil = $earthquakes->features[$i]->properties->time;
                 $seconds = $mil / 1000;
 
                 echo $earthquakes->features[$i]->properties->title . ' ' . $earthquakes->features[$i]->properties->mag .
                 ' ' . date("d.m.Y H:i:s", $seconds) . ' ' . $earthquakes->features[$i]->geometry->coordinates[0]
-                    . ' ' . $earthquakes->features[$i]->geometry->coordinates[1] . ' ' .
-                    $earthquakes->features[$i]->geometry->coordinates[2] . ' ' . "\n";
+                    . ' ' . $earthquakes->features[$i]->geometry->coordinates[1] . ' ' . "\n";
+
+                $earthquake = Earthquakes::find()->where([
+                    'time_in_source' => (int)$seconds])
+                    ->one();
+                if(!$earthquake):
+                    $earthquake = new Earthquakes();
+                endif;
+                $earthquake->title = $earthquakes->features[$i]->properties->title;
+                $earthquake->mag = (float) $earthquakes->features[$i]->properties->mag;
+                $earthquake->time_in_source = (int)$seconds;
+                $earthquake->lon = (float) $earthquakes->features[$i]->geometry->coordinates[0];
+                $earthquake->lat = (float) $earthquakes->features[$i]->geometry->coordinates[1];
+                $earthquake->save();
+
             }
         }
         return ExitCode::OK;
     }
+
 }
