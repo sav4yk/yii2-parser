@@ -33,7 +33,7 @@ class RadiationObninskController extends Controller
         $res = $client->request('GET', 'http://www.feerc.obninsk.org/remac/reqx.htm', [
             'query' => [
                 'p1' => '0',
-                'p2' => '2',
+                'p2' => '1',                                    //2,1
                 'p3' => '1',                                    //type(1)
                 'p4' => '0',
                 'p5' => date('d'),                       //day
@@ -64,12 +64,12 @@ class RadiationObninskController extends Controller
                $c = preg_match_all($re3, $tr[$i][0], $td, PREG_SET_ORDER, 0);
 
                 $rad_point = RadiationPoints::find()->where([
-                    'date' => $date, 'station' =>$td[1][1]])
+                    'date' => $date, 'station' =>trim($td[1][1])])
                     ->one();
                 if(!$rad_point):
                     $rad_point = new RadiationPoints();
                 endif;
-                $rad_point->station = $td[1][1];
+                $rad_point->station = trim($td[1][1]);
                 $rad_point->lon = (float)$td[2][1];
                 $rad_point->lat =(float)$td[3][1];
                 $rad_point->h = (int)$td[4][1];
