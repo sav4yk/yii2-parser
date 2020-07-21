@@ -49,23 +49,39 @@ class ProxyController extends Controller
                     $latency = $ping->ping();
                     if ($latency !== false) {
                         print "Latency is " . $latency . " ms - added\n";
+                        $InsertArray[]=[
+                            'ip'=>strip_tags($host),
+                            'port'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_port),
+                            'type'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_type),
+                            'isSSL'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_ssl,
+                            'check_timestamp'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_check_timestamp,
+                            'country_code'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_country_code),
+                            'latency'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_latency,
+                            'reliability'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_reliability,
+                        ];
 
-                        $proxy = new Proxies();
-                        $proxy->ip = strip_tags($host);
-                        $proxy->port = strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_port);
-                        $proxy->type = strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_type);
-                        $proxy->isSSL = (int)$feed->channel->item[$n]->prx_proxy[$i]->prx_ssl;
-                        $proxy->check_timestamp = (int)$feed->channel->item[$n]->prx_proxy[$i]->prx_check_timestamp;
-                        $proxy->country_code = strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_country_code);
-                        $proxy->latency = (int)$feed->channel->item[$n]->prx_proxy[$i]->prx_latency;
-                        $proxy->reliability = (int)$feed->channel->item[$n]->prx_proxy[$i]->prx_reliability;
-                        $proxy->save();
                     }
                     else {
                         print "Host could not be reached - passed.\n";
                     }
                 }
             }
+
+            if(count($InsertArray)>0){
+                $columnNameArray=['ip','port','type','isSSL','check_timestamp','country_code','latency','reliability'];
+                // below line insert all your record and return number of rows inserted
+                $insertCount = Yii::$app->db->createCommand()
+                    ->batchInsert(
+                        "proxies", $columnNameArray, $InsertArray
+                    )
+                    ->execute();
+                print "--------------------------------\n";
+                print "Saved " . $insertCount . " proxies\n";
+            } else {
+                print "--------------------------------\n";
+                print "Saved 0 proxies\n";
+            }
+
         }
         return ExitCode::OK;
     }
