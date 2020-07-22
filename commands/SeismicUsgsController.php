@@ -26,12 +26,12 @@ class SeismicUsgsController extends Controller
      * @param int $radius control radius.
      * @return int Exit code
      */
-    public function actionIndex($latitude = '44.600246', $longitude = '33.530273', $radius = 5)
+    public function actionIndex($latitude = '44.600246', $longitude = '33.530273', $radius = 3)
     {
         $client = new Client();
         $res = $client->request('GET', 'https://earthquake.usgs.gov/fdsnws/event/1/query.geojson', [
             'query' => [
-                'starttime' => date('Y-m-d', strtotime("-12 months")),
+                'starttime' => date('Y-m-d', strtotime("-12 year")),
                 'endtime' => date('Y-m-d'),
                 'maxlatitude' => ((float) $latitude + $radius),
                 'minlatitude' => ((float) $latitude - $radius),
@@ -51,21 +51,23 @@ class SeismicUsgsController extends Controller
 
                 echo $earthquakes->features[$i]->properties->title . ' ' . $earthquakes->features[$i]->properties->mag .
                 ' ' . date("d.m.Y H:i:s", $seconds) . ' ' . $earthquakes->features[$i]->geometry->coordinates[0]
-                    . ' ' . $earthquakes->features[$i]->geometry->coordinates[1] . ' ' . "\n";
+                    . ' ' . $earthquakes->features[$i]->geometry->coordinates[1] ;
 
                 $earthquake = Earthquakes::find()->where([
                     'time_in_source' => (int)$seconds])
                     ->one();
                 if(!$earthquake):
                     $earthquake = new Earthquakes();
+                    echo "\t--> added";
                 endif;
                 $earthquake->title = $earthquakes->features[$i]->properties->title;
+                $earthquake->source = "USGS";
                 $earthquake->mag = (float) $earthquakes->features[$i]->properties->mag;
                 $earthquake->time_in_source = (int)$seconds;
                 $earthquake->lon = (float) $earthquakes->features[$i]->geometry->coordinates[0];
                 $earthquake->lat = (float) $earthquakes->features[$i]->geometry->coordinates[1];
                 $earthquake->save();
-
+                echo "\n";
             }
         }
         return ExitCode::OK;
