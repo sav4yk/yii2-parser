@@ -43,7 +43,7 @@ class ProxyController extends Controller
             Proxies::deleteAll();
             for($n=0;$n<count($feed->channel->item);$n++) {
                 for ($i = 0; $i < count($feed->channel->item[$n]->prx_proxy); $i++) {
-                    echo $feed->channel->item[$n]->prx_proxy[$i]->prx_ip . "\n";
+                    echo $feed->channel->item[$n]->prx_proxy[$i]->prx_ip . "\t";
                     $host = $feed->channel->item[$n]->prx_proxy[$i]->prx_ip;
                     $ping = new Ping($host, $ttl, $timeout);
                     $latency = $ping->ping();
@@ -56,7 +56,7 @@ class ProxyController extends Controller
                             'isSSL'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_ssl,
                             'check_timestamp'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_check_timestamp,
                             'country_code'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_country_code),
-                            'latency'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_latency,
+                            'latency'=> $latency,
                             'reliability'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_reliability,
                         ];
 
