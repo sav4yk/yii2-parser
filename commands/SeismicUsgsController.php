@@ -6,6 +6,7 @@
 namespace app\commands;
 
 use app\models\Earthquakes;
+use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use GuzzleHttp\Client;
@@ -45,29 +46,40 @@ class SeismicUsgsController extends Controller
             $earthquakes = json_decode($res->getBody());
             $count = $earthquakes->metadata->count;
             if ($count>20) $count = 20;
+            $InsertArray=[];
             for ($i=0; $i<$count; $i++){
                 $mil = $earthquakes->features[$i]->properties->time;
                 $seconds = $mil / 1000;
-
-                echo $earthquakes->features[$i]->properties->title . ' ' . $earthquakes->features[$i]->properties->mag .
-                ' ' . date("d.m.Y H:i:s", $seconds) . ' ' . $earthquakes->features[$i]->geometry->coordinates[0]
-                    . ' ' . $earthquakes->features[$i]->geometry->coordinates[1] ;
-
                 $earthquake = Earthquakes::find()->where([
                     'time_in_source' => (int)$seconds])
                     ->one();
                 if(!$earthquake):
-                    $earthquake = new Earthquakes();
-                    echo "\t--> added";
+                    $InsertArray[]=[
+                        'title' => $earthquakes->features[$i]->properties->title,
+                        'source' => "USGS",
+                        'mag' => (float) $earthquakes->features[$i]->properties->mag,
+                        'time_in_source' => (int)$seconds,
+                        'lon' => (float) $earthquakes->features[$i]->geometry->coordinates[0],
+                        'lat' => (float) $earthquakes->features[$i]->geometry->coordinates[1],
+                    ];
+
+                    echo date("d.m.Y H:i:s", $seconds) . ' ' . $earthquakes->features[$i]->properties->title . ' ' .
+                        $earthquakes->features[$i]->geometry->coordinates[0] . ' ' .
+                        $earthquakes->features[$i]->geometry->coordinates[1] . "\t--> added" . "\n";
                 endif;
-                $earthquake->title = $earthquakes->features[$i]->properties->title;
-                $earthquake->source = "USGS";
-                $earthquake->mag = (float) $earthquakes->features[$i]->properties->mag;
-                $earthquake->time_in_source = (int)$seconds;
-                $earthquake->lon = (float) $earthquakes->features[$i]->geometry->coordinates[0];
-                $earthquake->lat = (float) $earthquakes->features[$i]->geometry->coordinates[1];
-                $earthquake->save();
-                echo "\n";
+            }
+            if(count($InsertArray)>0){
+                $columnNameArray=['title','source','mag','time_in_source','lon','lat'];
+                $insertCount = Yii::$app->db->createCommand()
+                    ->batchInsert(
+                        "earthquakes", $columnNameArray, $InsertArray
+                    )
+                    ->execute();
+                print "--------------------------------\n";
+                print "Saved " . $insertCount . " earthquakes\n";
+            } else {
+                print "--------------------------------\n";
+                print "Saved 0 earthquakes\n";
             }
         }
         return ExitCode::OK;

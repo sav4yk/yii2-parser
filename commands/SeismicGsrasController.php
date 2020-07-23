@@ -6,6 +6,7 @@
 namespace app\commands;
 
 use app\models\Earthquakes;
+use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use GuzzleHttp\Client;
@@ -48,35 +49,47 @@ class SeismicGsrasController extends Controller
 
             $re3 = '/<tr(.*?)>(.*?)<\/tr>/s';
             $c = preg_match_all($re3, $table[0][0], $tr, PREG_SET_ORDER, 0);
+            $InsertArray=[];
             if ($c != 1)
             for ($i = 0; $i < $c; $i++) {
                 $re4 = '/<td(.*?)>(.*?)<\/td>/s';
                 $c = preg_match_all($re4, $tr[$i][0], $td, PREG_SET_ORDER, 0);
-                $added = '';
                 $earthquake = Earthquakes::find()->where([
                     'time_in_source' => (int)strtotime($td[1][2])])
                     ->one();
                 if(!$earthquake):
-                    $earthquake = new Earthquakes();
-                    $added = "\t--> added";
+                    if ($td[8][2] != '-')
+                        $mag = (float) $td[8][2];
+                    else
+                        $mag = (float) $td[7][2];
+                    $InsertArray[]=[
+                        'title' => "M " . $mag . " - " . strip_tags($td[9][2]),
+                        'source' => "GSRAS",
+                        'mag' => $mag,
+                        'time_in_source' => (int)strtotime($td[1][2]),
+                        'lon' => (float) $td[3][2],
+                        'lat' => (float) $td[2][2],
+                    ];
+
+                    echo date("d.m.Y H:i:s", (int)strtotime($td[1][2])) . ' ' .
+                        "M " . $mag . " - " . strip_tags($td[9][2]) . ' ' .
+                        (float) $td[3][2] . ' ' . (float) $td[2][2] . "\t--> added" . "\n";
                 endif;
-                if ($td[8][2] != '-')
-                    $mag = (float) $td[8][2];
-                else
-                    $mag = (float) $td[7][2];
-                $earthquake->title = "M " . $mag . " - " . strip_tags($td[9][2]);
-                $earthquake->source = "GSRAS";
-                $earthquake->mag = $mag;
-                $earthquake->time_in_source = (int)strtotime($td[1][2]);
-                $earthquake->lon = (float) $td[3][2];
-                $earthquake->lat = (float) $td[2][2];
-                $earthquake->save();
 
-                echo $earthquake->title . ' ' . $earthquake->mag .
-                    ' ' . date("d.m.Y H:i:s", $earthquake->time_in_source) . ' ' . $earthquake->lon
-                    . ' ' . $earthquake->lat . $added . "\n";
             }
-
+            if(count($InsertArray)>0){
+                $columnNameArray=['title','source','mag','time_in_source','lon','lat'];
+                $insertCount = Yii::$app->db->createCommand()
+                    ->batchInsert(
+                        "earthquakes", $columnNameArray, $InsertArray
+                    )
+                    ->execute();
+                print "--------------------------------\n";
+                print "Saved " . $insertCount . " earthquakes\n";
+            } else {
+                print "--------------------------------\n";
+                print "Saved 0 earthquakes\n";
+            }
         }
         return ExitCode::OK;
     }

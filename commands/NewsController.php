@@ -31,27 +31,41 @@ class NewsController extends Controller
         $client = new Client();
         //
         //https://tproger.ru/feed/
-        $res = $client->request('GET', 'https://laravel.demiart.ru/feed/');
+        $res = $client->request('GET', 'https://tproger.ru/feed/');
         if ($res->getStatusCode()==200) {
             $data = $res->getBody(true)->getContents();
             $data = str_replace("&", "&amp;", $data);
             $feed = simplexml_load_string($data);
+            $InsertArray=[];
             for($i=0;$i<count($feed->channel->item);$i++) {
                 $news = News::find()->where([
                     'pubDate' => (int)strtotime($feed->channel->item[$i]->pubDate)])
                     ->one();
                 if(!$news) {
-                    $news = new News();
-                }  else {
-                    break;
+                    echo date("d.m.Y H:i:s",(int)strtotime($feed->channel->item[$i]->pubDate)) . " " .
+                        strip_tags($feed->channel->title) . " " . strip_tags($feed->channel->item[$i]->title) . "\n";
+                    $InsertArray[]=[
+                        'channel' => strip_tags($feed->channel->title),
+                        'title' => strip_tags($feed->channel->item[$i]->title),
+                        'link' => strip_tags($feed->channel->item[$i]->link),
+                        'pubDate' => (int)strtotime($feed->channel->item[$i]->pubDate),
+                        'category' => strip_tags($feed->channel->item[$i]->category),
+                        'description' => strip_tags($feed->channel->item[$i]->description),
+                    ];
                 }
-                $news->channel = strip_tags($feed->channel->title);
-                $news->title = strip_tags($feed->channel->item[$i]->title);
-                $news->link = strip_tags($feed->channel->item[$i]->link);
-                $news->pubDate = (int)strtotime($feed->channel->item[$i]->pubDate);
-                $news->category = strip_tags($feed->channel->item[$i]->category);
-                $news->description = strip_tags($feed->channel->item[$i]->description);
-                $news->save();
+            }
+            if(count($InsertArray)>0){
+                $columnNameArray=['channel','title','link','pubDate','category','description'];
+                $insertCount = Yii::$app->db->createCommand()
+                    ->batchInsert(
+                        "news", $columnNameArray, $InsertArray
+                    )
+                    ->execute();
+                print "--------------------------------\n";
+                print "Saved " . $insertCount . " news\n";
+            } else {
+                print "--------------------------------\n";
+                print "Saved 0 news\n";
             }
         }
         return ExitCode::OK;

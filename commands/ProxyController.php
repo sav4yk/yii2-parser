@@ -41,6 +41,7 @@ class ProxyController extends Controller
             $ttl = 32;
             $timeout = 1;
             Proxies::deleteAll();
+            $InsertArray = [];
             for($n=0;$n<count($feed->channel->item);$n++) {
                 for ($i = 0; $i < count($feed->channel->item[$n]->prx_proxy); $i++) {
                     echo $feed->channel->item[$n]->prx_proxy[$i]->prx_ip . "\t";
@@ -49,17 +50,20 @@ class ProxyController extends Controller
                     $latency = $ping->ping();
                     if ($latency !== false) {
                         print "Latency is " . $latency . " ms - added\n";
-                        $InsertArray[]=[
-                            'ip'=>strip_tags($host),
-                            'port'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_port),
-                            'type'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_type),
-                            'isSSL'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_ssl,
-                            'check_timestamp'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_check_timestamp,
-                            'country_code'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_country_code),
-                            'latency'=> $latency,
-                            'reliability'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_reliability,
-                        ];
-
+                        $found = array_search(strip_tags($host), array_column($InsertArray, 'ip'));
+                        if ($found)
+                            echo "\n------------" . strip_tags($host). " - " . $found  . "\n";
+                        else
+                            $InsertArray[]=[
+                                'ip'=>strip_tags($host),
+                                'port'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_port),
+                                'type'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_type),
+                                'isSSL'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_ssl,
+                                'check_timestamp'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_check_timestamp,
+                                'country_code'=>strip_tags($feed->channel->item[$n]->prx_proxy[$i]->prx_country_code),
+                                'latency'=> $latency,
+                                'reliability'=>(int)$feed->channel->item[$n]->prx_proxy[$i]->prx_reliability,
+                            ];
                     }
                     else {
                         print "Host could not be reached - passed.\n";
