@@ -22,7 +22,7 @@ class RadiationPoints extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'radiatopn_points';
+        return 'radiation_points';
     }
 
     /**
