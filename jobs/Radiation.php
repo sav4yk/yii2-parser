@@ -9,6 +9,7 @@ use Yii;
 use GuzzleHttp\Client;
 use app\models\Proxies;
 use yii\base\BaseObject;
+use yii\db\Exception;
 use yii\queue\JobInterface;
 use app\models\RadiationPoints;
 
@@ -26,7 +27,7 @@ class Radiation extends BaseObject implements JobInterface
     /**
      * This command downloads, parse and store radiation data from feerc.obninsk.org to the database.
      * @param $queue
-     * @throws \yii\db\Exception
+     * @throws Exception
      */
     public function execute($queue)
     {

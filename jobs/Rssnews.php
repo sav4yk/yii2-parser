@@ -5,6 +5,7 @@
 
 namespace app\jobs;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Yii;
 use app\models\News;
 use GuzzleHttp\Client;
@@ -20,6 +21,7 @@ class Rssnews extends BaseObject implements JobInterface
 
     /**
      * This command downloads, parse and store data to the database .
+     * @throws GuzzleException
      */
     public function execute($queue)
     {

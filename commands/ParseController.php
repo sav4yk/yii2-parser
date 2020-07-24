@@ -7,8 +7,8 @@ namespace app\commands;
 
 use Yii;
 use app\jobs\Seismic;
-use app\jobs\Rssnews;
 use app\jobs\Radiation;
+use app\jobs\Rssnews;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -32,10 +32,10 @@ class ParseController extends Controller
             'radius' => 5,
         ]))) { echo "Radiation ok\n"; } else { echo "Radiation err\n"; }
         if (Yii::$app->queue->push(new Rssnews([
-            'url' => 'https://laravel.demiart.ru/feed/'
+            'url' => 'http://laravel.demiart.ru/feed/',
         ]))) { echo "News Laravel.Demiart ok\n"; } else { echo "News Laravel.Demiart err\n"; }
         if (Yii::$app->queue->push(new Rssnews([
-            'url' => 'https://tproger.ru/feed/'
+            'url' => 'http://tproger.ru/feed/',
         ]))) { echo "News Tproger ok\n"; } else { echo "News Tproger err\n"; }
 
         return ExitCode::OK;

@@ -5,7 +5,6 @@
 
 namespace app\commands;
 
-use app\models\Earthquakes;
 use app\models\News;
 use GuzzleHttp\Client;
 use Yii;
