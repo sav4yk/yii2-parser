@@ -1,6 +1,7 @@
 html,
 body {
     height: 100%;
+    color: #e57f12;
 }
 
 .wrap {
@@ -8,6 +9,7 @@ body {
     height: auto;
     margin: 0 auto -60px;
     padding: 0 0 60px;
+    background: #1d2124;
 }
 
 .wrap > .container {

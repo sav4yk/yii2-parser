@@ -21,11 +21,23 @@ class AppAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css'
     ];
     public $js = [
+        'https://cdn.jsdelivr.net/npm/vue/dist/vue.js',
+        'https://unpkg.com/chart.js@2.8.0/dist/Chart.bundle.js',
+        'https://unpkg.com/vue-chartkick@0.5.1'
     ];
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
     ];
+    public $jsOptions = ['position' => \yii\web\View::POS_HEAD];
+    public function init()
+    {
+        parent::init();
+        if (\yii::$app->request->url == '/web/site/index') {
+            $this->js[] = ['js/radchart.js', 'position' => \yii\web\View::POS_END]; // dynamic file added
+        }
+    }
 }
