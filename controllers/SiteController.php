@@ -2,6 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\Earthquakes;
+use app\models\RadiationPoints;
+use ArrayObject;
+use stdClass;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -9,6 +13,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use function MongoDB\BSON\toJSON;
 
 class SiteController extends Controller
 {
@@ -125,4 +130,35 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+
+    /**
+     * Return json radiation data to chart on main page.
+     *
+     * @return string
+     */
+    public function actionRadiation()
+    {
+        $rad_points = RadiationPoints::find()->select(['date', 'value','station'])->orderBy('date')->all();
+        foreach($rad_points as $t) {
+            $arr[$t->station][$t->date] = $t->value;
+        }
+        $arrkey = array_keys($arr);
+        foreach ($arrkey as $key) {
+            $ob['name'] = $key;
+            $ob['data'] = $arr[$key];
+            $arrr[] = $ob;
+        }
+        return \GuzzleHttp\json_encode($arrr);
+    }
+
+    /**
+     * Displays statistics page.
+     *
+     * @return string
+     */
+    public function actionStatistics()
+    {
+        return $this->render('about');
+    }
+
 }
