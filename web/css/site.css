@@ -26,8 +26,7 @@ a :hover {
 
 .footer {
     height: 60px;
-    background-color: #f5f5f5;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #866f4f;
     padding-top: 20px;
 }
 
@@ -176,4 +175,13 @@ table {
 }
 table, th, td {
     border: 1px solid #866f4f !important;
+}
+.navbar-inverse .navbar-brand {
+    color: #e57f12;
+}
+.navbar-inverse .navbar-nav > li > a {
+    color: #866f4f;
+}
+.navbar-inverse .navbar-nav > .active > a {
+    color: #e57f12;
 }

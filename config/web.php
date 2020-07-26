@@ -6,6 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
+    'name' => 'Информационная панель',
     'bootstrap' => ['log','queue' ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -14,14 +15,15 @@ $config = [
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '5FZXeHM1CwCjCY-6M0mihVCUeG14cj7X',
+            'cookieValidationKey' => '5AZXeHM1CwCjCY-6M0mihVCUeG14cj7X',
+            'baseUrl'=> ''
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
         'user' => [
             'identityClass' => 'app\models\User',
-            'enableAutoLogin' => true,
+            'enableAutoLogin' => false,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -55,6 +57,9 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                    '' => 'site/index',
+                'about' => 'site/about',
+                'login' => 'site/login',
             ],
         ],
     ],
