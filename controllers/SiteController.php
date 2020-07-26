@@ -4,16 +4,14 @@ namespace app\controllers;
 
 use app\models\Earthquakes;
 use app\models\RadiationPoints;
-use ArrayObject;
-use stdClass;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
-use function MongoDB\BSON\toJSON;
 
 class SiteController extends Controller
 {
@@ -66,7 +64,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $newsProvider = new ActiveDataProvider([
+            'query' => \app\models\News::find()->orderBy('pubDate DESC'),
+            'pagination' => [
+                'pageSize' => 3,
+            ],
+        ]);
+        $seismicProvider = new ActiveDataProvider([
+            'query' => Earthquakes::find()->orderBy('time_in_source DESC')->limit(7),
+            'pagination' => false
+        ]);
+        return $this->render('index',['listDataProvider' => $newsProvider, 'seismicDataProvider' => $seismicProvider]);
     }
 
     /**

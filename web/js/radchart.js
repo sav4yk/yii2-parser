@@ -1,7 +1,7 @@
 Chart.defaults.global.defaultFontColor='#a89a42';
 Vue.use(Chartkick.use(Chart));
 Chartkick.options = {
-    colors: ["#a89a42", "#e57f12", "#583a01", "#332200", "#866f4f", "#595B00", "#342200", "#592700", "#a6ad42"]
+    colors: ["#a89a42", "#e57f12", "#583a01", "#2d74a0", "#866f4f", "#595B00", "#c24b26", "#4b7d07", "#a6ad42"]
 }
 
 var app = new Vue({
@@ -13,14 +13,8 @@ var app = new Vue({
             layout: {
                 padding: {left: 10, right: 5, top: 5, bottom: 2}
             },
-            title: {
-                display: true,
-                text: 'Радиационная обстановка',
-                fontColor: '#a89a42',
-                position:'top'
-            },
             animation: {
-                easing: 'easeOutQuint'
+                easing: 'easeInOutQuart'
             },
             tooltips: {
                 callbacks: {

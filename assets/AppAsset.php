@@ -36,7 +36,7 @@ class AppAsset extends AssetBundle
     public function init()
     {
         parent::init();
-        if (\yii::$app->request->url == '/web/site/index') {
+        if (\yii::$app->request->getPathInfo() == 'site/index' || \yii::$app->request->getPathInfo() == '') {
             $this->js[] = ['js/radchart.js', 'position' => \yii\web\View::POS_END]; // dynamic file added
         }
     }
