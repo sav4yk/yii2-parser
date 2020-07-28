@@ -12,7 +12,6 @@ use Yii;
  * @property string $title
  * @property string $link
  * @property int $pubDate
- * @property string $category
  * @property string $description
  */
 class News extends \yii\db\ActiveRecord
@@ -31,10 +30,10 @@ class News extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['channel', 'title', 'link', 'pubDate', 'category', 'description'], 'required'],
+            [['channel', 'title', 'link', 'pubDate', 'description'], 'required'],
             [['pubDate'], 'integer'],
             [['description','title'], 'string'],
-            [['channel', 'link', 'category'], 'string', 'max' => 255],
+            [['channel', 'link'], 'string', 'max' => 255],
         ];
     }
 
@@ -49,14 +48,24 @@ class News extends \yii\db\ActiveRecord
             'title' => 'Title',
             'link' => 'Link',
             'pubDate' => 'Pub Date',
-            'category' => 'Category',
             'description' => 'Description',
         ];
     }
 
+    /**
+     * @return false|string
+     */
     public function getDateText()
     {
         return date('d.m.Y', $this->pubDate);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCategories()
+    {
+        return $this->hasMany(Category::className(), ['news_id' => 'id']);
     }
 
 }

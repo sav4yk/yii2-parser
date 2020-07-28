@@ -26,14 +26,24 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($category = '')
     {
-        $newsProvider = new ActiveDataProvider([
-            'query' => \app\models\News::find()->orderBy('pubDate DESC'),
-            'pagination' => [
-                'pageSize' => 3,
-            ],
-        ]);
+        if ($category!='') {
+            $newsProvider = new ActiveDataProvider([
+                'query' => \app\models\News::find()->joinWith('categories')->where(['category'=>$category])->orderBy('pubDate DESC'),
+                'pagination' => [
+                    'pageSize' => 3,
+                ],
+            ]);
+        } else {
+            $newsProvider = new ActiveDataProvider([
+                'query' => \app\models\News::find()->orderBy('pubDate DESC'),
+                'pagination' => [
+                    'pageSize' => 3,
+                ],
+            ]);
+        }
+
         $seismicProvider = new ActiveDataProvider([
             'query' => Earthquakes::find()->orderBy('time_in_source DESC')->limit(7),
             'pagination' => false

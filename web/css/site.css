@@ -185,3 +185,7 @@ table, th, td {
 .navbar-inverse .navbar-nav > .active > a {
     color: #e57f12;
 }
+.badge {
+    color: #1d2124;
+    background-color: #866f4f;
+}

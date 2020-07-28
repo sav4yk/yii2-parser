@@ -28,14 +28,14 @@ class NewsController extends Controller
     public function actionIndex()
     {
         $client = new Client();
-        //
-        //https://tproger.ru/feed/
         $res = $client->request('GET', 'https://tproger.ru/feed/');
         if ($res->getStatusCode()==200) {
             $data = $res->getBody(true)->getContents();
             $data = str_replace("&", "&amp;", $data);
             $feed = simplexml_load_string($data);
             $InsertArray=[];
+            $InsertCategoryArray=[];
+            $news_id = 0;
             for($i=0;$i<count($feed->channel->item);$i++) {
                 $news = News::find()->where([
                     'pubDate' => (int)strtotime($feed->channel->item[$i]->pubDate)])
@@ -48,13 +48,19 @@ class NewsController extends Controller
                         'title' => strip_tags($feed->channel->item[$i]->title),
                         'link' => strip_tags($feed->channel->item[$i]->link),
                         'pubDate' => (int)strtotime($feed->channel->item[$i]->pubDate),
-                        'category' => strip_tags($feed->channel->item[$i]->category),
                         'description' => strip_tags($feed->channel->item[$i]->description),
                     ];
+                    $news_id++;
+                    foreach ($feed->channel->item[$i]->category as $category) {
+                        $InsertCategoryArray[]=[
+                            'news_id' => $news_id,
+                            'category' => strip_tags($category),
+                    ];
+                    }
                 }
             }
             if(count($InsertArray)>0){
-                $columnNameArray=['channel','title','link','pubDate','category','description'];
+                $columnNameArray=['channel','title','link','pubDate','description'];
                 $insertCount = Yii::$app->db->createCommand()
                     ->batchInsert(
                         "news", $columnNameArray, $InsertArray
@@ -62,6 +68,18 @@ class NewsController extends Controller
                     ->execute();
                 print "--------------------------------\n";
                 print "Saved " . $insertCount . " news\n";
+                $id = Yii::$app->db->createCommand('SELECT max(id) FROM news')
+                    ->queryScalar();
+                print "news_id=" .$news_id . "\n";
+                foreach ($InsertCategoryArray as &$cat) {
+                    $cat['news_id'] = $id - $insertCount + $cat['news_id'];
+                }
+                $insertCount = Yii::$app->db->createCommand()
+                    ->batchInsert(
+                        "category", ['news_id','category'], $InsertCategoryArray
+                    )
+                    ->execute();
+                print "Saved " . $insertCount . " news categories\n";
             } else {
                 print "--------------------------------\n";
                 print "Saved 0 news\n";
