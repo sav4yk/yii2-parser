@@ -53,4 +53,10 @@ class News extends \yii\db\ActiveRecord
             'description' => 'Description',
         ];
     }
+
+    public function getDateText()
+    {
+        return date('d.m.Y', $this->pubDate);
+    }
+
 }

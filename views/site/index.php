@@ -58,7 +58,7 @@ $this->title = 'Информация';
                 echo ListView::widget([
                     'dataProvider' => $listDataProvider,
                     'itemView' => '_list',
-                    'summary' => 'Показано {count} из {totalCount}',
+                    'summary' => '',
                     'pager' => [
                         'firstPageLabel' => 'Первая',
                         'lastPageLabel' => 'Последняя',
