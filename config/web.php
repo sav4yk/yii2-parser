@@ -62,6 +62,7 @@ $config = [
             'rules' => [
                     '' => 'site/index',
                 'about' => 'site/about',
+                'currency' => 'site/finance',
                 'gii' => 'gii',
                 [
                     'class' => 'yii\rest\UrlRule',

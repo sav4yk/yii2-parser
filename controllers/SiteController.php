@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\Currency;
 use app\models\Earthquakes;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
@@ -61,4 +62,19 @@ class SiteController extends Controller
         return $this->render('about');
     }
 
+    /**
+     * Displays сurrency page.
+     *
+     * @return string
+     */
+    public function actionFinance($date = '')
+    {
+        if (!$date)
+            $date = date('d.m.Y',strtotime('-1day'));
+        $financeProvider = new ActiveDataProvider([
+            'query' => Currency::find()->Where(['date'=>strtotime( str_replace('.', '-', $date ) )])->orderBy('сharCode ASC'),
+            'pagination' => false
+        ]);
+        return $this->render('finance',['financeDataProvider' => $financeProvider]);
+    }
 }
