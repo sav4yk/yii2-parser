@@ -6,9 +6,13 @@
 namespace app\commands;
 
 use Yii;
+use DateTime;
+use DatePeriod;
+use DateInterval;
 use app\jobs\Seismic;
 use app\jobs\Radiation;
 use app\jobs\Rssnews;
+use app\jobs\CurrencyDaily;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -37,6 +41,16 @@ class ParseController extends Controller
         if (Yii::$app->queue->push(new Rssnews([
             'url' => 'http://tproger.ru/feed/',
         ]))) { echo "News Tproger ok\n"; } else { echo "News Tproger err\n"; }
+
+        $date =  new DateTime();
+        $d2 =  new DateTime('-30 days');
+        $interval = DateInterval::createFromDateString('1 day');
+        $period = new DatePeriod($d2, $interval, $date);
+        foreach ($period as $dt) {
+            if (Yii::$app->queue->push(new CurrencyDaily([
+                'date' => $dt->format("d/m/Y"),
+            ]))) { echo "Daily CBR " . $dt->format("d/m/Y") . " ok\n"; } else { echo "Daily CBR " . $dt->format("d/m/Y") . " err\n"; }
+        }
 
         return ExitCode::OK;
     }
