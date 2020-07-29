@@ -42,15 +42,11 @@ class ParseController extends Controller
             'url' => 'http://tproger.ru/feed/',
         ]))) { echo "News Tproger ok\n"; } else { echo "News Tproger err\n"; }
 
-        $date =  new DateTime();
-        $d2 =  new DateTime('-30 days');
-        $interval = DateInterval::createFromDateString('1 day');
-        $period = new DatePeriod($d2, $interval, $date);
-        foreach ($period as $dt) {
-            if (Yii::$app->queue->push(new CurrencyDaily([
-                'date' => $dt->format("d/m/Y"),
-            ]))) { echo "Daily CBR " . $dt->format("d/m/Y") . " ok\n"; } else { echo "Daily CBR " . $dt->format("d/m/Y") . " err\n"; }
-        }
+
+        if (Yii::$app->queue->push(new CurrencyDaily()))
+        { echo "Daily CBR ok\n"; } else {
+            echo "Daily CBR err\n"; }
+
 
         return ExitCode::OK;
     }

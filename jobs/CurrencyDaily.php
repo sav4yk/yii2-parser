@@ -14,10 +14,6 @@ use GuzzleHttp\Exception\GuzzleException;
 
 class CurrencyDaily extends BaseObject implements JobInterface
 {
-    /**
-     * @var int $date set request date
-     */
-    public $date;
 
     /**
      * This command downloads, parse and store data to the database .
@@ -25,8 +21,8 @@ class CurrencyDaily extends BaseObject implements JobInterface
      */
     public function execute($queue)
     {
-        echo "\nGet daily data " . $this->date . " start\n";
-       $this->CbrDaily($this->date);
+        echo "\nGet sbr data start\n";
+       $this->CbrDaily();
 
     }
 
@@ -35,13 +31,10 @@ class CurrencyDaily extends BaseObject implements JobInterface
      *
      * @return int Exit code
      */
-    public function CbrDaily($date = '14/07/2020')
+    public function CbrDaily()
     {
         $client = new Client();
         $res = $client->request('GET', 'http://www.cbr.ru/scripts/XML_daily.asp', [
-            'query' => [
-                'date_req' => $date,
-            ],
             'timeout' => 10,
         ]);
         if ($res->getStatusCode()==200) {
@@ -51,20 +44,36 @@ class CurrencyDaily extends BaseObject implements JobInterface
             $cnt = count($feed->Valute);
             $date =  date( strtotime($feed->attributes()->Date));
             for($i=0;$i<$cnt;$i++) {
-                $currency = Currency::find()->where([
-                    'date' => $date])
-                    ->one();
-                if(!$currency) {
-                    echo $date . " " . strip_tags($feed->Valute[$i]->Name) . "\n";
-                    $InsertArray[]=[
-                        'valuteID' => strip_tags($feed->Valute[$i]->attributes()->ID),
-                        'numCode' => strip_tags($feed->Valute[$i]->NumCode),
-                        'сharCode' => strip_tags($feed->Valute[$i]->CharCode),
-                        'name' => strip_tags($feed->Valute[$i]->Name),
-                        'value' => strip_tags($feed->Valute[$i]->Value),
-                        'date' => $date,
-                    ];
+                $id = strip_tags($feed->Valute[$i]->attributes()->ID);
+                $res2= $client->request('GET', 'http://www.cbr.ru/scripts/XML_dynamic.asp', [
+                    'query' => [
+                        'date_req1' => date('d/m/Y',strtotime('-30 days')),
+                        'date_req2' => date('d/m/Y'),
+                        'VAL_NM_RQ' => $id,
+                    ],
+                    'timeout' => 10,
+                ]);
+                if ($res2->getStatusCode()==200) {
+                    $data = $res2->getBody(true)->getContents();
+                    $feed_dynamic = simplexml_load_string($data);
+                    $cnt_d = count($feed_dynamic->Record);
+                    for($n=0;$n<$cnt_d;$n++) {
+                        $currency = Currency::find()->where([
+                            'date' => $date])->andWhere(['valuteID' => $id])
+                            ->one();
+                        if(!$currency) {
+                            $InsertArray[] = [
+                                'valuteID' => strip_tags($feed->Valute[$i]->attributes()->ID),
+                                'numCode' => strip_tags($feed->Valute[$i]->NumCode),
+                                'сharCode' => strip_tags($feed->Valute[$i]->CharCode),
+                                'name' => strip_tags($feed->Valute[$i]->Name),
+                                'value' => strip_tags($feed_dynamic->Record[$n]->Value),
+                                'date' => strtotime($feed_dynamic->Record[$n]->attributes()->Date),
+                            ];
+                        }
+                    }
                 }
+
             }
             if(count($InsertArray)>0){
                 $columnNameArray=['valuteID','numCode','сharCode','name','value', 'date'];
