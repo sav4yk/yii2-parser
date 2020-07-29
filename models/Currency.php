@@ -28,6 +28,16 @@ class Currency extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public function fields()
+    {
+        $fields = parent::fields();
+        unset($fields['id']);
+        return $fields;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function rules()
     {
         return [
