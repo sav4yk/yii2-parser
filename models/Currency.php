@@ -59,7 +59,7 @@ class Currency extends \yii\db\ActiveRecord
             'id' => 'ID',
             'valuteID' => 'Valute ID',
             'numCode' => 'Num Code',
-            'сharCode' => 'Сhar Code',
+            'сharCodes' => 'Сhar Code',
             'name' => 'Name',
             'value' => 'Value',
             'date' => 'Date',
