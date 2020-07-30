@@ -45,7 +45,7 @@ $this->title = 'Информация';
                             'columns' => [
                                 [
                                     'label' => 'Код',
-                                    'attribute' => 'сharCode',
+                                    'attribute' => 'сharCodes',
                                     'format' => 'text'
                                 ],
                                 [

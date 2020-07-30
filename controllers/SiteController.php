@@ -32,7 +32,8 @@ class SiteController extends Controller
     {
         if ($category!='') {
             $newsProvider = new ActiveDataProvider([
-                'query' => \app\models\News::find()->joinWith('categories')->where(['category'=>$category])->orderBy('pubDate DESC'),
+                'query' => \app\models\News::find()->joinWith('categories')->where(['category'=>$category])->
+                orderBy('pubDate DESC'),
                 'pagination' => [
                     'pageSize' => 3,
                 ],
@@ -50,7 +51,8 @@ class SiteController extends Controller
             'query' => Earthquakes::find()->orderBy('time_in_source DESC')->limit(7),
             'pagination' => false
         ]);
-        return $this->render('index',['listDataProvider' => $newsProvider, 'seismicDataProvider' => $seismicProvider]);
+        return $this->render('index',['listDataProvider' => $newsProvider,
+            'seismicDataProvider' => $seismicProvider]);
     }
 
     /**
@@ -72,7 +74,8 @@ class SiteController extends Controller
     {
 
         $financeProvider = new ActiveDataProvider([
-            'query' => Currency::find()->Where(['date'=>strtotime( str_replace('.', '-', $date ) )])->orderBy('сharCode ASC'),
+            'query' => Currency::find()->Where(['date'=>strtotime( str_replace('.', '-', $date ) )])
+                ->orderBy('сharCodes ASC'),
             'pagination' => false
         ]);
         return $this->render('finance',['financeDataProvider' => $financeProvider]);

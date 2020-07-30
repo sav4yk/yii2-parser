@@ -41,11 +41,11 @@ class Currency extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['valuteID', 'numCode', 'сharCode', 'name', 'value', 'date'], 'required'],
+            [['valuteID', 'numCode', 'сharCodes', 'name', 'value', 'date'], 'required'],
             [['value'], 'number'],
             [['date'], 'integer'],
             [['valuteID'], 'string', 'max' => 10],
-            [['numCode', 'сharCode'], 'string', 'max' => 4],
+            [['numCode', 'сharCodes'], 'string', 'max' => 4],
             [['name'], 'string', 'max' => 255],
         ];
     }

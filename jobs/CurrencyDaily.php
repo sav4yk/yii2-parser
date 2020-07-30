@@ -65,7 +65,7 @@ class CurrencyDaily extends BaseObject implements JobInterface
                             $InsertArray[] = [
                                 'valuteID' => strip_tags($feed->Valute[$i]->attributes()->ID),
                                 'numCode' => strip_tags($feed->Valute[$i]->NumCode),
-                                'сharCode' => strip_tags($feed->Valute[$i]->CharCode),
+                                'сharCodes' => strip_tags($feed->Valute[$i]->CharCode),
                                 'name' => strip_tags($feed->Valute[$i]->Name),
                                 'value' => strip_tags($feed_dynamic->Record[$n]->Value),
                                 'date' => strtotime($feed_dynamic->Record[$n]->attributes()->Date),
@@ -76,7 +76,7 @@ class CurrencyDaily extends BaseObject implements JobInterface
 
             }
             if(count($InsertArray)>0){
-                $columnNameArray=['valuteID','numCode','сharCode','name','value', 'date'];
+                $columnNameArray=['valuteID','numCode','сharCodes','name','value', 'date'];
                 $insertCount = Yii::$app->db->createCommand()
                     ->batchInsert(
                         "currency", $columnNameArray, $InsertArray
@@ -86,7 +86,7 @@ class CurrencyDaily extends BaseObject implements JobInterface
                 print "Saved " . $insertCount . " currency\n";
             } else {
                 print "--------------------------------\n";
-                print "Saved 0 news\n";
+                print "Saved 0 currency\n";
             }
         }
     }

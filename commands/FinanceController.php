@@ -18,9 +18,9 @@ class FinanceController extends Controller
      *
      * @return int Exit code
      */
-    public function actionIndex($date = '14/07/2020')
+    public function actionIndex($date = '')
     {
-        $this->CbrDaily();
+        $this->CbrDaily($date);
         return ExitCode::OK;
     }
 
@@ -29,7 +29,7 @@ class FinanceController extends Controller
      *
      * @return int Exit code
      */
-    public function CbrDaily($date = '14/07/2020')
+    public function CbrDaily($date = '')
     {
         $client = new Client();
         $res = $client->request('GET', 'http://www.cbr.ru/scripts/XML_daily.asp', [
@@ -60,13 +60,13 @@ class FinanceController extends Controller
                     $cnt_d = count($feed_dynamic->Record);
                     for($n=0;$n<$cnt_d;$n++) {
                         $currency = Currency::find()->where([
-                            'date' => $date])->andWhere(['valuteID' => $id])
+                            'date' => strtotime($feed_dynamic->Record[$n]->attributes()->Date)])->andWhere(['valuteID' => $id])
                             ->one();
                         if(!$currency) {
                             $InsertArray[] = [
                                 'valuteID' => strip_tags($feed->Valute[$i]->attributes()->ID),
                                 'numCode' => strip_tags($feed->Valute[$i]->NumCode),
-                                'сharCode' => strip_tags($feed->Valute[$i]->CharCode),
+                                'сharCodes' => strip_tags($feed->Valute[$i]->CharCode),
                                 'name' => strip_tags($feed->Valute[$i]->Name),
                                 'value' => strip_tags($feed_dynamic->Record[$n]->Value),
                                 'date' => strtotime($feed_dynamic->Record[$n]->attributes()->Date),
@@ -77,7 +77,7 @@ class FinanceController extends Controller
 
             }
             if(count($InsertArray)>0){
-                $columnNameArray=['valuteID','numCode','сharCode','name','value', 'date'];
+                $columnNameArray=['valuteID','numCode','сharCodes','name','value', 'date'];
                 $insertCount = Yii::$app->db->createCommand()
                     ->batchInsert(
                         "currency", $columnNameArray, $InsertArray
@@ -87,7 +87,7 @@ class FinanceController extends Controller
                 print "Saved " . $insertCount . " currency\n";
             } else {
                 print "--------------------------------\n";
-                print "Saved 0 news\n";
+                print "Saved 0 currency\n";
             }
         }
         return ExitCode::OK;
