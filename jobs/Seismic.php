@@ -35,32 +35,29 @@ class Seismic extends BaseObject implements JobInterface
 
     /**
      * This command downloads, parse and store seismic data from earthquake.usgs.gov to the database.
-     * @param string $latitude user latitude coordinate.
-     * @param string $longitude user longitude coordinate.
-     * @param int $radius control radius.
      * @throws GuzzleException
      * @throws Exception
      */
-    public function Usgs($latitude = '44.600246', $longitude = '33.530273', $radius = 3)
+    public function Usgs()
     {
         echo "\nUSGS start\n";
         $client = new Client();
+        echo "now = " . date('Y-m-d H:i:s') . "\n";
         $res = $client->request('GET', 'https://earthquake.usgs.gov/fdsnws/event/1/query.geojson', [
             'query' => [
-                'starttime' => date('Y-m-d', strtotime("-12 year")),
-                'endtime' => date('Y-m-d'),
-                'maxlatitude' => ((float) $latitude + $radius),
-                'minlatitude' => ((float) $latitude - $radius),
-                'maxlongitude' => ((float) $longitude + $radius),
-                'minlongitude' => ((float) $longitude - $radius),
+                'starttime' => date('Y-m-d H:i:s', strtotime('-6 hour', time())),
+                'endtime' => date('Y-m-d H:i:s',strtotime('-4 hour', time())),
                 'minmagnitude' => '0',
                 'orderby' => 'time',
             ]
         ]);
+        echo "https://earthquake.usgs.gov/fdsnws/event/1/query.geojson?starttime=" .
+            date('Y-m-d H:i:s', strtotime('-6 hour', time())) .
+            '&endtime=' . date('Y-m-d H:i:s',strtotime('-4 hour', time())) .
+            "&minmagnitude=0&orderby=time\n";
         if ($res->getStatusCode()==200) {
             $earthquakes = json_decode($res->getBody());
             $count = $earthquakes->metadata->count;
-            if ($count>20) $count = 20;
             $InsertArray=[];
             for ($i=0; $i<$count; $i++){
                 $mil = $earthquakes->features[$i]->properties->time;
@@ -90,11 +87,11 @@ class Seismic extends BaseObject implements JobInterface
                         "earthquakes", $columnNameArray, $InsertArray
                     )
                     ->execute();
-                echo "--------------------------------\n";
-                echo "Saved " . $insertCount . " new earthquakes\n";
+                print "--------------------------------\n";
+                print "Saved " . $insertCount . " earthquakes\n";
             } else {
-                echo "--------------------------------\n";
-                echo "Saved 0 earthquakes\n";
+                print "--------------------------------\n";
+                print "Saved 0 earthquakes\n";
             }
         }
     }

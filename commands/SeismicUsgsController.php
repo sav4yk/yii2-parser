@@ -22,30 +22,27 @@ class SeismicUsgsController extends Controller
 {
     /**
      * This command downloads, parse and store data to the database .
-     * @param string $latitude user latitude coordinate.
-     * @param string $longitude user longitude coordinate.
-     * @param int $radius control radius.
      * @return int Exit code
      */
-    public function actionIndex($latitude = '44.600246', $longitude = '33.530273', $radius = 3)
+    public function actionIndex()
     {
         $client = new Client();
+        echo "now = " . date('Y-m-d H:i:s') . "\n";
         $res = $client->request('GET', 'https://earthquake.usgs.gov/fdsnws/event/1/query.geojson', [
             'query' => [
-                'starttime' => date('Y-m-d', strtotime("-12 year")),
-                'endtime' => date('Y-m-d'),
-                'maxlatitude' => ((float) $latitude + $radius),
-                'minlatitude' => ((float) $latitude - $radius),
-                'maxlongitude' => ((float) $longitude + $radius),
-                'minlongitude' => ((float) $longitude - $radius),
+                'starttime' => date('Y-m-d H:i:s', strtotime('-6 hour', time())),
+                'endtime' => date('Y-m-d H:i:s',strtotime('-4 hour', time())),
                 'minmagnitude' => '0',
                 'orderby' => 'time',
-                ]
+            ]
         ]);
+        echo "https://earthquake.usgs.gov/fdsnws/event/1/query.geojson?starttime=" .
+            date('Y-m-d H:i:s', strtotime('-6 hour', time())) .
+            '&endtime=' . date('Y-m-d H:i:s',strtotime('-4 hour', time())) .
+            "&minmagnitude=0&orderby=time\n";
         if ($res->getStatusCode()==200) {
             $earthquakes = json_decode($res->getBody());
             $count = $earthquakes->metadata->count;
-            if ($count>20) $count = 20;
             $InsertArray=[];
             for ($i=0; $i<$count; $i++){
                 $mil = $earthquakes->features[$i]->properties->time;
@@ -84,7 +81,5 @@ class SeismicUsgsController extends Controller
         }
         return ExitCode::OK;
     }
-
-
 
 }

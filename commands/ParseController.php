@@ -25,11 +25,6 @@ class ParseController extends Controller
      */
     public function actionIndex()
     {
-        if (Yii::$app->queue->push(new Seismic([
-            'latitude' => '44.600246',
-            'longitude' => '33.530273',
-            'radius' => 5,
-        ]))) { echo "Seismic ok\n"; } else { echo "Seismic err\n"; }
         if (Yii::$app->queue->push(new Radiation([
             'latitude' => '44.600246',
             'longitude' => '33.530273',
