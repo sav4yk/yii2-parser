@@ -30,12 +30,11 @@ class SeismicGsrasController extends Controller
     public function actionIndex($latitude = '44.600246', $longitude = '33.530273', $radius = 5)
     {
         $client = new Client();
-        $res = $client->request('GET', 'http://www.ceme.gsras.ru/cgi-bin/new/mapCustom.pl', [
+        http://www.ceme.gsras.ru/cgi-bin/new/ccd_quake.pl?dat=2020-08-21&l=0
+        $res = $client->request('GET', 'http://www.ceme.gsras.ru/cgi-bin/new/ccd_quake.p', [
             'query' => [
-                'lat' => ((float) $latitude),
-                'lon' => ((float) $longitude),
-                'rad' => $radius*100,
-                'num' => '10'
+                'dat' => date('Y-m-d'),
+                'l' => 0
                 ]
         ]);
         if ($res->getStatusCode()==200) {

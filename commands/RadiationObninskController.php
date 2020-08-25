@@ -39,7 +39,7 @@ class RadiationObninskController extends Controller
             try {
                 $load = true;
                 echo $proxy[$proxy_i]["ip"] . ":" . $proxy[$proxy_i]["port"];
-                $res = $client->request('GET', 'http://www.feerc.obninsk.org/remac/reqx.htm', [
+                 $res = $client->request('GET', 'http://www.feerc.obninsk.org/remac/reqx.htm', [
                     'proxy' => $proxy[$proxy_i]["ip"] . ":" . $proxy[$proxy_i]["port"],
                     'query' => [
                         'p1' => '0',
@@ -49,18 +49,19 @@ class RadiationObninskController extends Controller
                         'p5' => date('d'),                       //day
                         'p6' => ((int)date('m') - 1),              //month(-1)
                         'p7' => date('Y'),                       //year
-                        'p8' => '2',
+//                        'p8' => '2',
                         'p9' => '1',
-                        'p10' => ((float)$longitude - $radius),        //left longitude
-                        'p11' => ((float)$longitude + $radius),        //right longitude
-                        'p12' => ((float)$latitude + $radius),         //north latitude
-                        'p13' => ((float)$latitude - $radius),          //south latitude
+//                        'p10' => ((float)$longitude - $radius),        //left longitude
+//                        'p11' => ((float)$longitude + $radius),        //right longitude
+//                        'p12' => ((float)$latitude + $radius),         //north latitude
+//                        'p13' => ((float)$latitude - $radius),          //south latitude
                     ],
                     'timeout' => 10,
                     'http_errors' => true
                 ]);
 
                 if ($res->getStatusCode() == 200) {
+                    $InsertArray = [];
                     echo "\t data loaded,";
                     $rad_points = $res->getBody()->getContents();
                     $rad_points = iconv("windows-1251", "utf-8", $rad_points);
@@ -72,11 +73,12 @@ class RadiationObninskController extends Controller
                     $c = preg_match_all($re1, $rad_points, $table, PREG_SET_ORDER, 0);
 
                     $re2 = '/<tr>(.*?)<\/tr>/s';
-                    $c = preg_match_all($re2, $table[0][0], $tr, PREG_SET_ORDER, 0);
+                    $count = preg_match_all($re2, $table[0][0], $tr, PREG_SET_ORDER, 0);
 
                     $date = date('Y-m-d');
                     echo "\t proxy used and deleted\n";
-                    for ($i = 1; $i <= $c; $i++) {
+                    echo "c=" . $c . "\n";
+                    for ($i = 0; $i < $count; $i++) {
                         $re3 = '/<td>(.*?)<\/td>/s';
                         $c = preg_match_all($re3, $tr[$i][0], $td, PREG_SET_ORDER, 0);
 
@@ -115,6 +117,7 @@ class RadiationObninskController extends Controller
             } catch (\GuzzleHttp\Exception\GuzzleException $e) {
                 $load = false;
                 echo "\t connection error\n";
+                Proxies::deleteAll(['ip' => $proxy[$proxy_i]["ip"], 'port' => $proxy[$proxy_i]["port"]]);
                 $proxy_i++;
                     if ($proxy_i>count($proxy)-1) {
                         print "--------------------------------\n";
