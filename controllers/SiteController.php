@@ -66,6 +66,16 @@ class SiteController extends Controller
     }
 
     /**
+     * Displays settings page.
+     *
+     * @return string
+     */
+    public function actionSettings()
+    {
+        return $this->render('settings');
+    }
+
+    /**
      * Displays сurrency page.
      *
      * @return string

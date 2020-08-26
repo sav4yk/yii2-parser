@@ -39,6 +39,7 @@ AppAsset::register($this);
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
             ['label' => 'Главная', 'url' => ['/site/index']],
+            ['label' => 'Настройки', 'url' => ['/settings']],
             ['label' => 'Финансы', 'url' => ['/currency']],
             ['label' => 'О нас', 'url' => ['/site/about']],
         ],
