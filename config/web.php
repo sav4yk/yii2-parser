@@ -62,6 +62,7 @@ $config = [
             'rules' => [
                     '' => 'site/index',
                 'about' => 'site/about',
+                'settings/update' => 'site/settings',
                 'settings' => 'site/settings',
                 'currency' => 'site/finance',
                 'gii' => 'gii',

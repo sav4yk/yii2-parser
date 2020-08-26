@@ -4,7 +4,7 @@ namespace app\controllers;
 
 use app\models\Currency;
 use app\models\Earthquakes;
-use DateTime;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 
@@ -72,7 +72,31 @@ class SiteController extends Controller
      */
     public function actionSettings()
     {
-        return $this->render('settings');
+        $request = Yii::$app->request;
+        if ($request->isPost) {
+            $cookies = Yii::$app->response->cookies;
+            if ($request->post('Address')) {
+                $cookies->add(new \yii\web\Cookie([
+                    'name' => 'Address',
+                    'value' => $request->post('Address'),
+                ]));
+            }
+            if ($request->post('longlat')) {
+                $cookies->add(new \yii\web\Cookie([
+                    'name' => 'longlat',
+                    'value' => $request->post('longlat'),
+                ]));
+            }
+            if ($request->post('radius')) {
+                $cookies->add(new \yii\web\Cookie([
+                    'name' => 'radius',
+                    'value' => $request->post('radius'),
+                ]));
+            }
+            return $this->render('settings',['info'=>123]);
+        } else {
+            return $this->render('settings');
+        }
     }
 
     /**
