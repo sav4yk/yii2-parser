@@ -6,28 +6,24 @@ use kartik\checkbox\CheckboxX;
 use kartik\range\RangeInput;
 use yii\helpers\Html;
 
+use yii\jui\AutoComplete;
+use yii\web\JsExpression;
 $this->title = 'Настройки';
-
+$cookies = Yii::$app->request->cookies;
 ?>
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php if (isset($info)): ?>
+    <?php if (isset($data['info'])): ?>
         <div class="alert alert-success" role="alert">
             Данные сохранены
         </div>
-    <?php else: ?>
+    <?php elseif (!$cookies->getValue('Address')): ?>
         <div class="alert alert-warning" role="alert">
             На нашем ресурсе огромное количество обновляемых данных.
-            По умолчанию данные фильтруются для города Севастополь радиусом 200 км.<br>
+            По умолчанию данные фильтруются для города Севастополь радиусом 500 км.<br>
             Вы можете указать свои данные, которые будут храниться у вас на компьютере.
         </div>
     <?php endif; ?>
-    <?php
-
-    use yii\jui\AutoComplete;
-    use yii\web\JsExpression;
-    $cookies = Yii::$app->request->cookies;
-    ?>
-    <?= Html::beginForm(['settings/update'], 'post') ?>
+    <?= Html::beginForm(['settings'], 'post') ?>
 <div class="form-group row">
     <div class="col-sm-6">
         <div class="form-group row">
@@ -35,8 +31,8 @@ $this->title = 'Настройки';
             <div class="col-sm-8">    <?= AutoComplete::widget([
                     'name' => 'Address',
                     'id' => 'Address',
-                    'value' => $cookies->getValue('Address', ''),
-                    'options' => ['class' => 'form-control'],
+                    'value' => $data['Address'] ?? $cookies->getValue('Address', 'Россия, Севастополь'),
+                    'options' => ['class' => 'form-control', 'required' => true],
                     'clientOptions'=>[
                         'minLenght' => 3,
                         'autoFill'=>true,
@@ -69,16 +65,16 @@ $this->title = 'Настройки';
         <div class="form-group row">
             <?= Html::label('Ваши координаты', 'longlat', ['class' => 'col-sm-4 col-form-label']) ?>
             <div class="col-sm-8">
-                <?= Html::input('text', 'longlat', $cookies->getValue('longlat', ''),['class' => 'form-control', 'id'=> 'longlat','readonly'=> true]) ?>
+                <?= Html::input('text', 'longlat', $data['longlat'] ?? $cookies->getValue('longlat', '33.526402 44.556972'),['class' => 'form-control', 'id'=> 'longlat','readonly'=> true]) ?>
             </div>
         </div>
         <div class="form-group row">
             <?= Html::label('Радиус обзора', 'radius', ['class' => 'col-sm-4 col-form-label']) ?>
             <div class="col-sm-8"><?= RangeInput::widget([
                     'name' => 'radius',
-                    'value' => $cookies->getValue('radius', 200),
+                    'value' => $data['radius'] ?? $cookies->getValue('radius',  200),
                     'html5Container' => ['style' => 'width:70%'],
-                    'html5Options' => ['min' => 50, 'max' => 1000],
+                    'html5Options' => ['min' => 200, 'max' => 4000],
                     'addon' => ['append' => ['content' => 'км']]
                 ]);?></div>
         </div>

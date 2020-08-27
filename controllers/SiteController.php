@@ -80,20 +80,24 @@ class SiteController extends Controller
                     'name' => 'Address',
                     'value' => $request->post('Address'),
                 ]));
+                $data['Address'] = $request->post('Address');
             }
             if ($request->post('longlat')) {
                 $cookies->add(new \yii\web\Cookie([
                     'name' => 'longlat',
                     'value' => $request->post('longlat'),
                 ]));
+                $data['longlat'] = $request->post('longlat');
             }
             if ($request->post('radius')) {
                 $cookies->add(new \yii\web\Cookie([
                     'name' => 'radius',
                     'value' => $request->post('radius'),
                 ]));
+                $data['radius'] = $request->post('radius');
             }
-            return $this->render('settings',['info'=>123]);
+            $data['info'] = $request->post('radius');
+            return $this->render('settings',['data'=>$data]);
         } else {
             return $this->render('settings');
         }
