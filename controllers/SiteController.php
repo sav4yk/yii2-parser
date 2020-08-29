@@ -4,9 +4,11 @@ namespace app\controllers;
 
 use app\models\Currency;
 use app\models\Earthquakes;
+use app\models\News;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
+use yii\web\Cookie;
 
 class SiteController extends Controller
 {
@@ -30,9 +32,11 @@ class SiteController extends Controller
      */
     public function actionIndex($category = '')
     {
-        if ($category!='') {
+        $cookies = Yii::$app->request->cookies;
+
+        if ($category != '') {
             $newsProvider = new ActiveDataProvider([
-                'query' => \app\models\News::find()->joinWith('categories')->where(['category'=>$category])->
+                'query' => News::find()->joinWith('categories')->where(['category' => $category])->
                 orderBy('pubDate DESC'),
                 'pagination' => [
                     'pageSize' => 3,
@@ -40,19 +44,42 @@ class SiteController extends Controller
             ]);
         } else {
             $newsProvider = new ActiveDataProvider([
-                'query' => \app\models\News::find()->orderBy('pubDate DESC'),
+                'query' => News::find()->orderBy('pubDate DESC'),
                 'pagination' => [
                     'pageSize' => 3,
                 ],
             ]);
         }
+        $longlat = preg_split('/\s+/', $cookies->getValue('longlat', '33.526402 44.556972'));
+        $lat = $longlat[1];
+        $lon = $longlat[0];
+        $radius = $cookies->getValue('radius', 500);
 
         $seismicProvider = new ActiveDataProvider([
-            'query' => Earthquakes::find()->orderBy('time_in_source DESC')->limit(7),
+            'query' => Earthquakes::find()->select([
+                '*',
+                '(
+                    6371 * acos (
+                        cos ( radians(' . $lat . ') )
+                        * cos( radians( lat ) )
+                        * cos( radians( lon ) - radians(' . $lon . ') )
+                        + sin ( radians(' . $lat . ') )
+                        * sin( radians( lat ) )
+                    )
+                ) AS distance'
+            ])
+                ->having(['<', 'distance', $radius])
+                ->orderBy([
+                    //  'distance' => SORT_ASC,
+                    'time_in_source' => SORT_DESC,
+                ])
+                ->limit(7),
             'pagination' => false
         ]);
-        return $this->render('index',['listDataProvider' => $newsProvider,
-            'seismicDataProvider' => $seismicProvider]);
+        return $this->render('index', [
+            'listDataProvider' => $newsProvider,
+            'seismicDataProvider' => $seismicProvider
+        ]);
     }
 
     /**
@@ -76,28 +103,28 @@ class SiteController extends Controller
         if ($request->isPost) {
             $cookies = Yii::$app->response->cookies;
             if ($request->post('Address')) {
-                $cookies->add(new \yii\web\Cookie([
+                $cookies->add(new Cookie([
                     'name' => 'Address',
                     'value' => $request->post('Address'),
                 ]));
                 $data['Address'] = $request->post('Address');
             }
             if ($request->post('longlat')) {
-                $cookies->add(new \yii\web\Cookie([
+                $cookies->add(new Cookie([
                     'name' => 'longlat',
                     'value' => $request->post('longlat'),
                 ]));
                 $data['longlat'] = $request->post('longlat');
             }
             if ($request->post('radius')) {
-                $cookies->add(new \yii\web\Cookie([
+                $cookies->add(new Cookie([
                     'name' => 'radius',
                     'value' => $request->post('radius'),
                 ]));
                 $data['radius'] = $request->post('radius');
             }
             $data['info'] = $request->post('radius');
-            return $this->render('settings',['data'=>$data]);
+            return $this->render('settings', ['data' => $data]);
         } else {
             return $this->render('settings');
         }
@@ -112,10 +139,10 @@ class SiteController extends Controller
     {
 
         $financeProvider = new ActiveDataProvider([
-            'query' => Currency::find()->Where(['date'=>strtotime( str_replace('.', '-', $date ) )])
+            'query' => Currency::find()->Where(['date' => strtotime(str_replace('.', '-', $date))])
                 ->orderBy('сharCodes ASC'),
             'pagination' => false
         ]);
-        return $this->render('finance',['financeDataProvider' => $financeProvider]);
+        return $this->render('finance', ['financeDataProvider' => $financeProvider]);
     }
 }
