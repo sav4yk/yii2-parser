@@ -26,12 +26,10 @@ class RadiationObninskController extends Controller
 
     /**
      * This command downloads, parse and store data to the database .
-     * @param string $latitude user latitude coordinate.
-     * @param string $longitude user longitude coordinate.
-     * @param int $radius control radius.
      * @return int Exit code
+     * @throws \yii\db\Exception
      */
-    public function actionIndex($latitude = '44.600246', $longitude = '33.530273', $radius = 5)
+    public function actionIndex()
     {
         $client = new Client();
         $load = false;
@@ -40,9 +38,9 @@ class RadiationObninskController extends Controller
         while ($load == false) {
             try {
                 $load = true;
-                echo "http://www.feerc.obninsk.org/remac/reqx.htm?p1=0&p2=1&p3=1&p4=0&p5=" .
-                    ((int)date('d') - 20) . "&p6=" . ((int)date('m') - 1) .
-                    "&p7=" . date('Y') . "&p9=1\n";
+//                echo "http://www.feerc.obninsk.org/remac/reqx.htm?p1=0&p2=1&p3=1&p4=0&p5=" .
+//                    ((int)date('d') - 20) . "&p6=" . ((int)date('m') - 1) .
+//                    "&p7=" . date('Y') . "&p9=1\n";
                 echo $proxy[$proxy_i]["ip"] . ":" . $proxy[$proxy_i]["port"];
 
                 $day = ((int)date('d'));

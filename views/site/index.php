@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 use yii\widgets\ListView;
 
 $this->title = 'Информация';
+$cookies = Yii::$app->request->cookies;
 ?>
 <div class="site-index">
     <div id="app">
@@ -14,6 +15,12 @@ $this->title = 'Информация';
             <div class="col-md-6 col-equal mt-2">
                 <div class="row">
                     <div class="col-md-12"><div class="title">Радиационная обстановка</div>
+                        <div class="text-center w-100">
+                            <?= $cookies->getValue('Address', 'Россия, Севастополь') ?>
+                            <?= $cookies->getValue('longlat', '33.526402 44.556972') ?>
+                            <?= $cookies->getValue('radius', '200') ?> км
+                        </div>
+                        <br>
                         <line-chart :legend="true"  :data="charturl" :refresh="60" :download="true" legend="bottom" suffix=" мкР/ч" :library="chartOptions"/></div>
                 </div>
                 <div class="row">
